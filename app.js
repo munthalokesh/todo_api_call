@@ -128,7 +128,7 @@ app.get("/todos/", async (request, response) => {
         response.status(400);
         response.send("Invalid Todo Priority");
       } else {
-        query = `SELECT * FROM todo WHERE status="${status}" AND priority="${priority}";`;
+        query = `SELECT * FROM todo WHERE status="${status}" AND priority="${priority}" ORDER BY id;`;
         dbResponse = await db.all(query);
         response.send(dbResponse.map((response) => convertToObject(response)));
       }
@@ -142,7 +142,7 @@ app.get("/todos/", async (request, response) => {
         response.status(400);
         response.send("Invalid Todo Category");
       } else {
-        query = `SELECT * FROM todo WHERE status="${status}" AND category="${category}";`;
+        query = `SELECT * FROM todo WHERE status="${status}" AND category="${category}" ORDER BY id;`;
         dbResponse = await db.all(query);
         response.send(dbResponse.map((response) => convertToObject(response)));
       }
@@ -156,7 +156,7 @@ app.get("/todos/", async (request, response) => {
         response.status(400);
         response.send("Invalid Todo Priority");
       } else {
-        query = `SELECT * FROM todo WHERE category="${category}" AND priority="${priority}";`;
+        query = `SELECT * FROM todo WHERE category="${category}" AND priority="${priority}" ORDER BY id;`;
         dbResponse = await db.all(query);
         response.send(dbResponse.map((response) => convertToObject(response)));
       }
@@ -166,13 +166,13 @@ app.get("/todos/", async (request, response) => {
         response.status(400);
         response.send("Invalid Todo Category");
       } else {
-        query = `SELECT * FROM todo WHERE category="${category}";`;
+        query = `SELECT * FROM todo WHERE category="${category}" ORDER BY id;`;
         dbResponse = await db.all(query);
         response.send(dbResponse.map((response) => convertToObject(response)));
       }
       break;
     case isStatusPresent(request):
-      query = `SELECT * FROM todo WHERE status="${status}";`;
+      query = `SELECT * FROM todo WHERE status="${status}" ORDER BY id;`;
       dbResponse = await db.all(query);
       if (dbResponse.length === 0) {
         response.status(400);
@@ -182,7 +182,7 @@ app.get("/todos/", async (request, response) => {
       }
       break;
     case isPriorityPresent(request):
-      query = `SELECT * FROM todo WHERE priority="${priority}";`;
+      query = `SELECT * FROM todo WHERE priority="${priority}" ORDER BY id;`;
       dbResponse = await db.all(query);
       if (dbResponse.length === 0) {
         response.status(400);
@@ -193,7 +193,7 @@ app.get("/todos/", async (request, response) => {
       break;
 
     default:
-      query = `SELECT * FROM todo WHERE todo LIKE "%${search_q}%";`;
+      query = `SELECT * FROM todo WHERE todo LIKE "%${search_q}%" ORDER BY id;`;
       dbResponse = await db.all(query);
       response.send(dbResponse.map((response) => convertToObject(response)));
       break;
@@ -203,7 +203,7 @@ app.get("/todos/", async (request, response) => {
 app.get("/todos/:todoId/", async (request, response) => {
   const { todoId } = request.params;
   console.log(todoId);
-  const getTodo = `SELECT * FROM todo where id=${todoId};`;
+  const getTodo = `SELECT * FROM todo where id=${todoId} ORDER BY id;`;
   const todo = await db.get(getTodo);
   response.send(convertToObject(todo));
 });
@@ -226,7 +226,7 @@ app.get("/agenda/", async (request, response) => {
   if (validateDate(dateObj) === true) {
     console.log("hi");
     newDate = formatDate(date);
-    const dateQuery = `SELECT * FROM todo WHERE due_date="${newDate}"; `;
+    const dateQuery = `SELECT * FROM todo WHERE due_date="${newDate}" ORDER BY id; `;
     const dbResponse = await db.all(dateQuery);
     response.send(dbResponse.map((response) => convertToObject(response)));
   } else {
@@ -250,7 +250,10 @@ app.post("/todos/", async (request, response) => {
     response.status(400);
     response.send("Invalid Due Date");
   } else {
-    const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
+    let getQuery = `SELECT * FROM todo WHERE id=${id} ORDER BY id; `;
+    const presentTodo = await db.get(getQuery);
+    if (presentTodo === undefined) {
+      const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
   VALUES (
       ${id},
       "${todo}",
@@ -259,8 +262,24 @@ app.post("/todos/", async (request, response) => {
       "${status}",
       "${dueDate}"
   );`;
-    await db.run(postQuery);
-    response.send("Todo Successfully Added");
+      await db.run(postQuery);
+      response.send("Todo Successfully Added");
+    } else {
+      const deleteQuery = `DELETE FROM todo WHERE id=${id};`;
+      await db.run(deleteQuery);
+      const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
+  VALUES (
+      ${id},
+      "${todo}",
+      "${category}",
+      "${priority}",
+      "${status}",
+      "${dueDate}"
+  );`;
+      await db.run(postQuery);
+      response.send("Todo Successfully Added");
+      console.log("already");
+    }
   }
 });
 
