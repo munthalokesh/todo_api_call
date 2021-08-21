@@ -123,8 +123,7 @@ app.get("/todos/", async (request, response) => {
       if (checkStatus(status) === false) {
         response.status(400);
         response.send("Invalid Todo Status");
-      }
-      if (checkPriority(priority) === false) {
+      } else if (checkPriority(priority) === false) {
         response.status(400);
         response.send("Invalid Todo Priority");
       } else {
@@ -137,8 +136,7 @@ app.get("/todos/", async (request, response) => {
       if (checkStatus(status) === false) {
         response.status(400);
         response.send("Invalid Todo Status");
-      }
-      if (checkCategory(category) === false) {
+      } else if (checkCategory(category) === false) {
         response.status(400);
         response.send("Invalid Todo Category");
       } else {
@@ -151,8 +149,7 @@ app.get("/todos/", async (request, response) => {
       if (checkCategory(category) === false) {
         response.status(400);
         response.send("Invalid Todo Category");
-      }
-      if (checkPriority(priority) === false) {
+      } else if (checkPriority(priority) === false) {
         response.status(400);
         response.send("Invalid Todo Priority");
       } else {
@@ -250,10 +247,7 @@ app.post("/todos/", async (request, response) => {
     response.status(400);
     response.send("Invalid Due Date");
   } else {
-    let getQuery = `SELECT * FROM todo WHERE id=${id} ORDER BY id; `;
-    const presentTodo = await db.get(getQuery);
-    if (presentTodo === undefined) {
-      const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
+    const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
   VALUES (
       ${id},
       "${todo}",
@@ -262,24 +256,8 @@ app.post("/todos/", async (request, response) => {
       "${status}",
       "${dueDate}"
   );`;
-      await db.run(postQuery);
-      response.send("Todo Successfully Added");
-    } else {
-      const deleteQuery = `DELETE FROM todo WHERE id=${id};`;
-      await db.run(deleteQuery);
-      const postQuery = `INSERT INTO todo(id,todo,category,priority,status,due_date)
-  VALUES (
-      ${id},
-      "${todo}",
-      "${category}",
-      "${priority}",
-      "${status}",
-      "${dueDate}"
-  );`;
-      await db.run(postQuery);
-      response.send("Todo Successfully Added");
-      console.log("already");
-    }
+    await db.run(postQuery);
+    response.send("Todo Successfully Added");
   }
 });
 

@@ -18,7 +18,7 @@ GET http://localhost:3000/todos/?category=HOME
 GET http://localhost:3000/todos/?category=LEARNING&priority=HIGH
 
 ###
-GET http://localhost:3000/todos/6/
+GET http://localhost:3000/todos/4/
 
 ###
 GET http://localhost:3000/agenda/?date=2021-02-22
@@ -28,8 +28,8 @@ POST http://localhost:3000/todos/
 Content-Type: application/json
 
 {
-  "id": 5,
-  "todo": "read",
+  "id": 4,
+  "todo": "sing",
   "priority": "LOW",
   "status": "IN PROGRESS",
   "category": "HOME",
